@@ -12,6 +12,12 @@ val = input(prompt);
 [x,y] = ginput(val); 
 close all;
 
+
+%output file names
+name     = {file_name};
+name   = name{1}(1:end-4);
+outputFileName = strcat(name,'_BW.tif');
+
 % pre-allocated arrays and cells
 list = [];
 listF = [];
@@ -22,6 +28,7 @@ orientate = [];
 CentroidKeep = cell(1,val);
 OrientationKeep = cell(1,val);
 BacteriaLength = cell(1,val);
+BacteriaArea = cell(1,val);
 
 %% find the bacteria
 for i = 1:avi_length
@@ -98,11 +105,13 @@ for i = 1:avi_length
         %majoraxislenght
         BacteriaLength{i} = [BacteriaLength{i}; [s(1).MajorAxisLength]];
         
+        BacteriaArea{i} = [BacteriaArea{i}; [sum(sum(cluster_label2))]];
         count = count+1;
     end
 
 imshow(cluster_label3);
-h = 34;
+imwrite(cluster_label3, outputFileName, 'WriteMode', 'append',  'Compression','none');
+
 
 end
 
@@ -110,18 +119,20 @@ end
 %% create jpg name for file
 name     = {file_name};
 name   = name{1}(1:end-4);
-name1    = strcat(name,'_results.txt');
-dlmwrite(name1, CentroidKeep,'delimiter','\t');
-% 
-% fileID = fopen('celldata.dat','w');
-% formatSpec = '%s %d %2.1f %s\n';
-% name2    = strcat(name,'_resultsF.txt');
-% name3    = strcat(name,'_resultsR.txt');
-% name4    = strcat(name,'_results_Orientation.txt');
-% dlmwrite(name1, list,'delimiter','\t');
-% dlmwrite(name2, listR,'delimiter','\t');
-% dlmwrite(name3, listF,'delimiter','\t');
-% dlmwrite(name4, orientate,'delimiter','\t');
 
+cent    = strcat(name,'_CentroidKeep.txt');
+bac    = strcat(name,'_BacteriaLength.txt');
+orie    = strcat(name,'_OrientationKeep.txt');
+ari    = strcat(name,'_BacteriaArea.txt');
+
+CentroidKeep = cell2mat(CentroidKeep);
+BacteriaLength = cell2mat(BacteriaLength);
+OrientationKeep = cell2mat(OrientationKeep);
+OrientationKeep = cell2mat(BacteriaArea);
+
+dlmwrite(cent, CentroidKeep,'delimiter','\t');
+dlmwrite(bac, BacteriaLength,'delimiter','\t');
+dlmwrite(orie, OrientationKeep,'delimiter','\t');
+dlmwrite(ari, BacteriaArea,'delimiter','\t');
 
 end
